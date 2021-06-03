@@ -1,3 +1,11 @@
+
+# editor files
+.idea
+
+*.env
+config.json
+
+
 *.js
 !jest.config.js
 *.d.ts

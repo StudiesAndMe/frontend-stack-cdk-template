@@ -9,7 +9,7 @@ import cdk = require('@aws-cdk/core');
 import targets = require('@aws-cdk/aws-route53-targets/lib');
 
 
-interface CustomProps extends cdk.StackProps {
+export interface CustomProps extends cdk.StackProps {
   env: { account: string, region: string },
   CdkTemplateStackId:string,
   PROJECT_NAME: string

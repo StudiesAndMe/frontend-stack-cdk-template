@@ -19,19 +19,23 @@ export interface CustomProps extends cdk.StackProps {
 }
 
 
+
 export class FrontendStackCdkTemplateStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: CustomProps) {
     super(scope, id, props);
 
-    const PROJECT_NAME = props.PROJECT_NAME
-    const ENV_TYPE = props.ENV_TYPE
+    const PROJECT_NAME = props.PROJECT_NAME //'sitetool-'
+    const ENV_TYPE = props.ENV_TYPE //'staging'
     const DISTRIBUTION_NAME = PROJECT_NAME + '-distribution'
     const FRONTEND_BUILD_FOLDER = props.FRONTEND_BUILD_FOLDER //"../client/build"
-    const HOSTED_DOMAIN_NAME = props.HOSTED_DOMAIN_NAME
+    const HOSTED_DOMAIN_NAME = props.HOSTED_DOMAIN_NAME //'studies-and-me.com'
+
 
     const domainName = HOSTED_DOMAIN_NAME
-    const siteSubDomain = PROJECT_NAME+ENV_TYPE
+    const siteSubDomain = PROJECT_NAME+'-'+ENV_TYPE
 
+    //const zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: props.domainName });
+    //const siteDomain = props.siteSubDomain + '.' + props.domainName;
     const zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: domainName });
 
     const siteDomain = siteSubDomain + '.' + domainName;
@@ -51,5 +55,50 @@ export class FrontendStackCdkTemplateStack extends cdk.Stack {
     });
     new cdk.CfnOutput(this, 'Bucket', { value: siteBucket.bucketName });
 
+    // TLS certificate
+    const certificateArn = new acm.DnsValidatedCertificate(this, 'SiteCertificate', {
+      domainName: siteDomain,
+      hostedZone: zone,
+      region: 'us-east-1', // Cloudfront only validates this region for certificates - if changes to eu-central-1 it fails
+    }).certificateArn;
+    new cdk.CfnOutput(this, 'Certificate', { value: certificateArn });
+
+    // CloudFront distribution that provides HTTPS
+    const distribution = new cloudfront.CloudFrontWebDistribution(this, DISTRIBUTION_NAME, {
+      aliasConfiguration: {
+        acmCertRef: certificateArn,
+        names: [ siteDomain ],
+        sslMethod: cloudfront.SSLMethod.SNI,
+        securityPolicy: cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016,
+      },
+      originConfigs: [
+        {
+          customOriginSource: {
+            domainName: siteBucket.bucketWebsiteDomainName,
+            originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+          },
+          behaviors : [ {isDefaultBehavior: true}],
+        }
+      ]
+    });
+    new cdk.CfnOutput(this, 'DistributionId', { value: distribution.distributionId });
+
+    // Route53 alias record for the CloudFront distribution
+    new route53.ARecord(this, 'SiteAliasRecord', {
+      recordName: siteDomain,
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+      zone
+    });
+
+    // Deploy site contents to S3 bucket
+    new s3deploy.BucketDeployment(this, 'DeployWithInvalidation', {
+      //sources: [ s3deploy.Source.asset('./site-contents') ],
+      sources: [s3deploy.Source.asset(FRONTEND_BUILD_FOLDER)],
+      destinationBucket: siteBucket,
+      distribution,
+      distributionPaths: ['/*'],
+    });
   }
+
+
 }

@@ -8,6 +8,7 @@ test('Empty Stack', () => {
 
   const props = {
     env: { account: 'acount-id', region: 'eu-central-1' },
+    CdkTemplateStackId:"test-stack-id",
     PROJECT_NAME: 'some-name',
     ENV_TYPE: 'staging',
     FRONTEND_BUILD_FOLDER: 'path-to-folder',

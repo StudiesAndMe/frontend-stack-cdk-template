@@ -10,7 +10,7 @@ const myProps:CustomProps = config as any
 
 const app = new cdk.App();
 
-//
+// The env is set in circleCI and reflects the branch
 const deployEnv = app.node.tryGetContext('env') || 'main'
 myProps.ENV_TYPE = deployEnv
 

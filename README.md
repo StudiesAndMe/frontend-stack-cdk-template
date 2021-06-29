@@ -70,8 +70,7 @@ cdk --profile=studiesandme destroy InfrastructureStack
 	"env": { "account": "111111111", "region": "eu-central-1" }
 }
 
-``
-
+```
 
 
 ### Boilerplate setup
@@ -88,3 +87,6 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
  * `cdk deploy`      deploy this stack to your default AWS account/region
  * `cdk diff`        compare deployed stack with current state
  * `cdk synth`       emits the synthesized CloudFormation template
+
+
+Example of using CDK with circleCI

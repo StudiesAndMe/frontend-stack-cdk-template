@@ -18,8 +18,6 @@ export interface CustomProps extends cdk.StackProps {
   HOSTED_DOMAIN_NAME: string
 }
 
-
-
 export class FrontendStackCdkTemplateStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: CustomProps) {
     super(scope, id, props);
@@ -30,12 +28,11 @@ export class FrontendStackCdkTemplateStack extends cdk.Stack {
     const FRONTEND_BUILD_FOLDER = props.FRONTEND_BUILD_FOLDER //"../client/build"
     const HOSTED_DOMAIN_NAME = props.HOSTED_DOMAIN_NAME //'studies-and-me.com'
 
-
     const domainName = HOSTED_DOMAIN_NAME
-    const siteSubDomain = PROJECT_NAME+'-'+ENV_TYPE
 
-    //const zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: props.domainName });
-    //const siteDomain = props.siteSubDomain + '.' + props.domainName;
+    // if main branch don't append branch name
+    const siteSubDomain = ENV_TYPE === 'main' ? PROJECT_NAME : PROJECT_NAME+'-' + ENV_TYPE
+
     const zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: domainName });
 
     const siteDomain = siteSubDomain + '.' + domainName;

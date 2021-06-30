@@ -30,8 +30,9 @@ export class FrontendStackCdkTemplateStack extends cdk.Stack {
 
     const domainName = HOSTED_DOMAIN_NAME
 
-    // if main branch don't append branch name
-    const siteSubDomain = ENV_TYPE === 'main' ? PROJECT_NAME : PROJECT_NAME+'-' + ENV_TYPE
+    // if main or master branch - don't append branch name to url
+    const isMainMaster = ENV_TYPE === 'main' || ENV_TYPE === 'master' ? true : false
+    const siteSubDomain = isMainMaster ? PROJECT_NAME : PROJECT_NAME + '-' + ENV_TYPE
 
     const zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: domainName });
 

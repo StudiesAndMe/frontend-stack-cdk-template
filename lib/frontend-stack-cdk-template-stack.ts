@@ -43,7 +43,7 @@ export class FrontendStackCdkTemplateStack extends cdk.Stack {
     const siteBucket = new s3.Bucket(this, 'SiteBucket', {
       bucketName: siteDomain,
       websiteIndexDocument: 'index.html',
-      websiteErrorDocument: 'error.html',
+      websiteErrorDocument: 'index.html',
       publicReadAccess: true,
 
       // The default removal policy is RETAIN, which means that cdk destroy will not attempt to delete

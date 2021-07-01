@@ -22,21 +22,20 @@ export class FrontendStackCdkTemplateStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: CustomProps) {
     super(scope, id, props);
 
-    const PROJECT_NAME = props.PROJECT_NAME //'sitetool-'
-    const ENV_TYPE = props.ENV_TYPE //'staging'
+    const PROJECT_NAME = props.PROJECT_NAME
+    const ENV_TYPE = props.ENV_TYPE
     const DISTRIBUTION_NAME = PROJECT_NAME + '-distribution'
-    const FRONTEND_BUILD_FOLDER = props.FRONTEND_BUILD_FOLDER //"../client/build"
-    const HOSTED_DOMAIN_NAME = props.HOSTED_DOMAIN_NAME //'studies-and-me.com'
+    const FRONTEND_BUILD_FOLDER = props.FRONTEND_BUILD_FOLDER
+    const HOSTED_DOMAIN_NAME = props.HOSTED_DOMAIN_NAME
 
     const domainName = HOSTED_DOMAIN_NAME
 
     // if main or master branch - don't append branch name to url
     const isMainMaster = ENV_TYPE === 'main' || ENV_TYPE === 'master' ? true : false
     const siteSubDomain = isMainMaster ? PROJECT_NAME : PROJECT_NAME + '-' + ENV_TYPE
-
     const zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: domainName });
-
     const siteDomain = siteSubDomain + '.' + domainName;
+
     new cdk.CfnOutput(this, 'Site', { value: 'https://' + siteDomain });
 
     // Content bucket
@@ -90,7 +89,6 @@ export class FrontendStackCdkTemplateStack extends cdk.Stack {
 
     // Deploy site contents to S3 bucket
     new s3deploy.BucketDeployment(this, 'DeployWithInvalidation', {
-      //sources: [ s3deploy.Source.asset('./site-contents') ],
       sources: [s3deploy.Source.asset(FRONTEND_BUILD_FOLDER)],
       destinationBucket: siteBucket,
       distribution,

@@ -37,9 +37,9 @@ export class FrontendStackCdkTemplateStack extends cdk.Stack {
     const siteSubDomain = isMainMaster ? PROJECT_NAME : PROJECT_NAME + '-' + ENV_TYPE
     const zone = 
           if(PUBLIC_HOSTED_ZONE) {
-            route53.HostedZone.fromLookup(this, 'Zone', { domainName: domainName });
+            route53.HostedZone.fromLookup(this, 'Zone', { domainName: domainName, privateZone: false });
           } else {
-            route53.PrivateHostedZone.fromLookup(this, 'Zone', { domainName: domainName });
+            route53.PrivateHostedZone.fromLookup(this, 'Zone', { domainName: domainName, privateZone: true });
           }
     const siteDomain = siteSubDomain + '.' + domainName;
 

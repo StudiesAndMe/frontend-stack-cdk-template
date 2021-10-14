@@ -16,6 +16,7 @@ export interface CustomProps extends cdk.StackProps {
   ENV_TYPE: string
   FRONTEND_BUILD_FOLDER: string
   HOSTED_DOMAIN_NAME: string
+  PUBLIC_HOSTED_ZONE: boolean
 }
 
 export class FrontendStackCdkTemplateStack extends cdk.Stack {
@@ -27,13 +28,19 @@ export class FrontendStackCdkTemplateStack extends cdk.Stack {
     const DISTRIBUTION_NAME = PROJECT_NAME + '-distribution'
     const FRONTEND_BUILD_FOLDER = props.FRONTEND_BUILD_FOLDER
     const HOSTED_DOMAIN_NAME = props.HOSTED_DOMAIN_NAME
+    const PUBLIC_HOSTED_ZONE = props.PUBLIC_HOSTED_ZONE
 
     const domainName = HOSTED_DOMAIN_NAME
 
     // if main or master branch - don't append branch name to url
     const isMainMaster = ENV_TYPE === 'main' || ENV_TYPE === 'master' ? true : false
     const siteSubDomain = isMainMaster ? PROJECT_NAME : PROJECT_NAME + '-' + ENV_TYPE
-    const zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: domainName });
+    const zone = 
+          if(PUBLIC_HOSTED_ZONE) {
+            route53.HostedZone.fromLookup(this, 'Zone', { domainName: domainName, privateZone: false });
+          } else {
+            route53.PrivateHostedZone.fromLookup(this, 'Zone', { domainName: domainName, privateZone: true });
+          }
     const siteDomain = siteSubDomain + '.' + domainName;
 
     new cdk.CfnOutput(this, 'Site', { value: 'https://' + siteDomain });
